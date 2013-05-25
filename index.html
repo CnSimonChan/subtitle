@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Subtitle Effect</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        input {
+            width: calc(100% - 100px);
+        }
+
+        #render {
+            position: absolute;
+            width: 100%;
+            top: 30px;
+            bottom: 0;
+            background: black;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" value="An example of subtitle effect" />
+    <button>Animate!</button>
+    <div id="render">
+    </div>
+    <script src="jquery-1.9.1.min.js"></script>
+    <script>
+        $("button").click(function () {
+            render.children().remove();
+            string = $("input").val();
+            animate();
+        })
+
+        var measureSpan = $("<span/>").css("display", "none")
+            .appendTo(document.body);
+        function measureText(str, fontFamily, fontSize) {
+            measureSpan.html(str).css({
+                "font-family": fontFamily,
+                "font-size": fontSize
+            });
+            return {
+                "width": measureSpan.width(),
+                "height": measureSpan.height()
+            };
+        }
+
+        var depth = 170,
+            altitude = 30,
+            speed = 300;
+        speed /= 1000;
+        var startOpacity = 0.3,
+            endOpacity = 0.15;
+        var startFontSize = 11,
+            endFontSize = 55,
+            fontFamily = "Segoe Script";
+        var topOffset = 20;
+        var string;
+
+        var englishChars = new RegExp("[a-zA-Z0-9]+");
+        var render = $("#render");
+        var spaceWidth = measureText("&nbsp;", fontFamily, endFontSize).width;
+
+        function animate() {
+            var index = 0;
+            var rect = measureText(string, fontFamily, endFontSize);
+            var width = rect.width,
+                center = render.width() / 2,
+                left = center - width / 2,
+                top = (render.height() - rect.height) / 2,
+                startTop = top - topOffset;
+
+            function animateChar() {
+                if (index >= string.length)
+                    return;
+                var char = string[index];
+                if (char == " ") {
+                    index++;
+                    left += spaceWidth;
+                    animateChar();
+                    return;
+                }
+                if (char.match(englishChars)) {
+                    var match = string.substring(index).match(englishChars)[0];
+                    char = match;
+                    index += match.length - 1;
+                }
+
+                var span = $("<span/>").text(char).css({
+                    "position": "absolute",
+                    "left": center,
+                    "top": startTop,
+                    "opacity": startOpacity,
+                    "font-family": fontFamily,
+                    "font-size": startFontSize,
+                    "color": "white"
+                }).animate({
+                    "left": left,
+                    "top": top,
+                    "opacity": 1,
+                    "font-size": endFontSize,
+                }, Math.sqrt(Math.pow(depth, 2) +
+                    Math.pow(center - left +
+                    measureText(char, fontFamily, endFontSize).width / 2, 2)) / speed,
+                "linear", function () {
+                    var multiplier = altitude / depth;
+                    var leftOverflow = (center - left) * multiplier;
+                    var fontSizeOverflow = endFontSize + (endFontSize - startFontSize) * multiplier;
+                    span.animate({
+                        "left": left - leftOverflow,
+                        "top": top + topOffset * multiplier,
+                        "opacity": endOpacity,
+                        "font-size": fontSizeOverflow
+                    }, Math.sqrt(Math.pow(altitude, 2) + Math.pow(leftOverflow, 2)) / speed,
+                    "linear", function () {
+                        span.remove();
+                    });
+                    span.clone().appendTo(render);
+                    index++;
+                    left += span.width();
+                    animateChar();
+                }).appendTo(render);
+            }
+
+            animateChar();
+        }
+    </script>
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date(); a = s.createElement(o),
+            m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-40855806-1', 'cnsimonchan.github.io');
+        ga('send', 'pageview');
+    </script>
+</body>
+</html>
