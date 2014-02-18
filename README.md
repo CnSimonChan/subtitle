@@ -1,4 +1,4 @@
 subtitle
 ========
 
-Try it at [here](http://cnsimonchan.github.io/subtitle/)
+Try it [here](http://cnsimonchan.github.io/subtitle/).
